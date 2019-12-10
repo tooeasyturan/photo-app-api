@@ -10,6 +10,12 @@ const userSchema = mongoose.Schema({
   lastName: String,
   email: String,
   passwordHash: String,
+  profile: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Profile'
+    }
+  ]
 })
 
 

@@ -25,8 +25,8 @@ app.use(bodyParser.json())
 app.use(middleware.requestLogger)
 app.use(middleware.errorHandler)
 
-app.use('/api/users', usersRouter)
-app.use('/api/login', loginRouter)
+app.use('/users', usersRouter)
+app.use('/login', loginRouter)
 
 
 
