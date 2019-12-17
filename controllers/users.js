@@ -26,6 +26,7 @@ usersRouter.post('/', async (request, response, next) => {
       username: body.username,
       // name: body.name,
       email: body.email,
+      date: new Date(),
       password: body.password,
       passwordHash
     })
@@ -78,9 +79,19 @@ usersRouter.get('/', async (request, response) => {
   response.json(users.map(u => u.toJSON()))
 })
 
-usersRouter.get('/', async (request, response) => {
-  const users = await User.find({}).populate('notes', { content: 1, date: 1 })
-  response.json(users.map(u => u.toJSON()))
+usersRouter.get('/:id', async (request, response, next) => {
+  try {
+    // const profile = await Profile.find({ username: request.params.username })
+    // console.log(request.params.username)
+    const user = await User.findById(request.params.id)
+    if (user) {
+      response.json(user.toJSON())
+    } else {
+      response.status(404).end()
+    }
+  } catch (exception) {
+    next(exception)
+  }
 })
 
 
