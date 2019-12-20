@@ -19,8 +19,6 @@ uploadsRouter.post('/', async (req, res) => {
     });
   }
 
-
-
   const file = await req.files.file
   file.mv(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/${file.name}`, err => {
     if (err) {
@@ -31,5 +29,23 @@ uploadsRouter.post('/', async (req, res) => {
     res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/${file.name}` })
   })
 })
+
+
+uploadsRouter.get('/:username', async (req, res) => {
+  console.log('test')
+  console.log('username params', req.params.username)
+
+  const uploadsFolder = `/Users/joshturan/tfp-frontend/public/uploads/${req.params.username}/`
+
+  fs.readdir(uploadsFolder, (err, files) => {
+    if (err) {
+      return console.log('Unable to scan directory: ' + err)
+    }
+    res.json(files)
+  })
+
+})
+
+
 
 module.exports = uploadsRouter

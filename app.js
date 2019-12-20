@@ -10,6 +10,7 @@ const fileupload = require('express-fileupload')
 const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
 const uploadsRouter = require('./controllers/uploads')
+const path = require('path')
 //const uploadsmulterRouter = require('./controllers/uploadsmulter')
 
 
@@ -27,12 +28,14 @@ app.use(cors())
 app.use(bodyParser.json())
 app.use(middleware.requestLogger)
 app.use(middleware.errorHandler)
-app.use(express.static('./public/uploads'))
+// app.use(express.static('./public/uploads'))
+app.use(express.static(__dirname + '/public/uploads/'))
+
 app.use(fileupload())
 
 app.use('/users', usersRouter)
 app.use('/login', loginRouter)
-app.use('/uploads', uploadsRouter)
+app.use(uploadsRouter)
 // app.use('/upload', uploadsmulterRouter)
 
 
