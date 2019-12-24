@@ -5,6 +5,7 @@ const fs = require("fs")
 const Profile = require('../models/profile')
 const jwt = require('jsonwebtoken')
 const Avatar = require('../models/avatar')
+const Portfolio = require('../models/portfolio')
 
 
 const getTokenFrom = request => {
@@ -15,36 +16,36 @@ const getTokenFrom = request => {
   return null
 }
 
-uploadsRouter.post('/', async (req, res) => {
+// uploadsRouter.post('/', async (req, res) => {
 
-  console.log('req.body', req.body)
-  if (req.files === null) {
-    return res.status(400).json({ msg: 'No file uploaded' })
-  }
+//   console.log('req.body', req.body)
+//   if (req.files === null) {
+//     return res.status(400).json({ msg: 'No file uploaded' })
+//   }
 
-  if (!fs.existsSync(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`)) {
-    fs.mkdir(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`, function (err) {
-      if (err) {
-        return console.error(err);
-      }
-      console.log("Directory created successfully!");
-    });
-  }
+//   if (!fs.existsSync(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`)) {
+//     fs.mkdir(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`, function (err) {
+//       if (err) {
+//         return console.error(err);
+//       }
+//       console.log("Directory created successfully!");
+//     });
+//   }
 
-  const file = await req.files.file
-  file.mv(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/${file.name}`, err => {
-    if (err) {
-      console.log(err)
-      return res.status(500).send(err)
-    }
+//   const file = await req.files.file
+//   file.mv(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/${file.name}`, err => {
+//     if (err) {
+//       console.log(err)
+//       return res.status(500).send(err)
+//     }
 
 
 
-    console.log('file name', file)
-    res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/${file.name}` })
+//     console.log('file name', file)
+//     res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/${file.name}` })
 
-  })
-})
+//   })
+// })
 
 uploadsRouter.post('/avatar', async (req, res, next) => {
   const body = req.body
@@ -132,44 +133,54 @@ uploadsRouter.get('/avatar/:username', async (req, res) => {
   })
 
 
-  // uploadsRouter.post('/', async (req, res, next) => {
-  //   const body = req.body
-  //   console.log('body', body)
+  uploadsRouter.post('/', async (req, res, next) => {
+    const body = req.body
+    console.log('body', body)
 
-  //   const token = getTokenFrom(request)
+    const token = getTokenFrom(req)
 
 
 
-  //   if (!fs.existsSync(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`)) {
-  //     fs.mkdir(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`), function (err) {
-  //       if (err) {
-  //         return console.error(err)
-  //       }
-  //       console.log("Directory created successfully!")
-  //     }
-  //   }
+    if (!fs.existsSync(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`)) {
+      fs.mkdir(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`), function (err) {
+        if (err) {
+          return console.error(err)
+        }
+        console.log("Directory created successfully!")
+      }
+    }
 
-  //   const file = await req.files.file
-  //   file.mv(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/${file.name}`, err => {
-  //     if (err) {
-  //       console.log(err)
-  //       return res.status(500).send(err)
-  //     }
-  //   })
+    const file = await req.files.file
+    file.mv(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/${file.name}`, err => {
+      if (err) {
+        console.log(err)
+        return res.status(500).send(err)
+      }
+    })
 
-  //   const user = await User.findById(decodedToken.id)
-  //   console.log('user', user)
+    try {
+      const decodedToken = jwt.verify(token, process.env.SECRET)
+      if (!token || !decodedToken.id) {
+        return response.status(401).json({ error: 'token missing or invalid' })
+      }
 
-  //   const profile = new Profile({
-  //     portfolio: `/uploads/${req.body.username}/${file.name}`,
-  //     user: user._id
-  //   })
+      const user = await User.findById(decodedToken.id)
+      console.log('user', user)
 
-  //   const savedPortfolio = await profile.save()
-  //   res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/${file.name}` })
-  //   res.json(savedPortfolio)
+      const portfolio = new Portfolio({
+        portfolio: `/uploads/${req.body.username}/${file.name}`,
+        user: user._id
+      })
 
-  // })
+      const savedPortfolio = await portfolio.save()
+      user.portfolio = user.portfolio.concat(savedPortfolio._id)
+      await user.save()
+      res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/${file.name}` })
+    } catch (exception) {
+      next(exception)
+    }
+
+  })
 
 })
 

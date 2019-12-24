@@ -1,19 +1,14 @@
 const mongoose = require('mongoose')
 
-const profileSchema = new mongoose.Schema({
-  location: String,
-  description: String,
-  experience: String,
-  shootingStyle: String,
-  website: String,
-  socialMedia: String,
+const portfolioSchema = new mongoose.Schema({
+  portfolio: String,
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }
 })
 
-profileSchema.set('toJSON', {
+portfolioSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
@@ -21,4 +16,4 @@ profileSchema.set('toJSON', {
   }
 })
 
-module.exports = mongoose.model('Profile', profileSchema)
+module.exports = mongoose.model('Portfolio', portfolioSchema)

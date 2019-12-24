@@ -22,6 +22,12 @@ const userSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Avatar'
     }
+  ],
+  portfolio: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Portfolio'
+    }
   ]
 })
 

@@ -53,14 +53,12 @@ usersRouter.post('/profile', async (request, response, next) => {
     const user = await User.findById(decodedToken.id)
 
     const profile = new Profile({
-      profilePicture: body.profilePicture,
       location: body.location,
       description: body.description,
       experience: body.experience,
       shootingStyle: body.shootingStyle,
       website: body.website,
       socialMedia: body.socialMedia,
-      portfolio: body.portfolio,
       user: user._id,
     })
 
