@@ -2,11 +2,22 @@ const uploadsRouter = require('express').Router()
 const bcrypt = require('bcrypt')
 const User = require('../models/user')
 const fs = require("fs")
+const Profile = require('../models/profile')
+const jwt = require('jsonwebtoken')
+const Avatar = require('../models/avatar')
 
+
+const getTokenFrom = request => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    return authorization.substring(7)
+  }
+  return null
+}
 
 uploadsRouter.post('/', async (req, res) => {
 
-  console.log('req.body', req.body.username)
+  console.log('req.body', req.body)
   if (req.files === null) {
     return res.status(400).json({ msg: 'No file uploaded' })
   }
@@ -27,11 +38,19 @@ uploadsRouter.post('/', async (req, res) => {
       return res.status(500).send(err)
     }
 
+
+
+    console.log('file name', file)
     res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/${file.name}` })
+
   })
 })
 
-uploadsRouter.post('/avatar', async (req, res) => {
+uploadsRouter.post('/avatar', async (req, res, next) => {
+  const body = req.body
+  console.log('req.body', req.body)
+  const token = getTokenFrom(req)
+  console.log('token', token)
 
   if (req.files === null) {
     return res.status(400).json({ msg: 'No file uploaded' })
@@ -52,9 +71,31 @@ uploadsRouter.post('/avatar', async (req, res) => {
       console.log(err)
       return res.status(500).send(err)
     }
-
-    res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/avatar/${file.name}` })
   })
+
+  try {
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+    if (!token || !decodedToken.id) {
+      return response.status(401).json({ error: 'token missing or invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
+
+
+    const avatar = new Avatar({
+      avatar: `/uploads/${req.body.username}/avatar/${file.name}`,
+      user: user._id
+    })
+
+    const savedAvatar = await avatar.save()
+    user.avatar = user.avatar.concat(savedAvatar._id)
+    await user.save()
+    console.log('saved avatar', savedAvatar)
+    res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/avatar/${file.name}` })
+  } catch (exception) {
+    next(exception)
+  }
+
 
 })
 
@@ -89,6 +130,46 @@ uploadsRouter.get('/avatar/:username', async (req, res) => {
     console.log(files)
     res.json(files)
   })
+
+
+  // uploadsRouter.post('/', async (req, res, next) => {
+  //   const body = req.body
+  //   console.log('body', body)
+
+  //   const token = getTokenFrom(request)
+
+
+
+  //   if (!fs.existsSync(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`)) {
+  //     fs.mkdir(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`), function (err) {
+  //       if (err) {
+  //         return console.error(err)
+  //       }
+  //       console.log("Directory created successfully!")
+  //     }
+  //   }
+
+  //   const file = await req.files.file
+  //   file.mv(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/${file.name}`, err => {
+  //     if (err) {
+  //       console.log(err)
+  //       return res.status(500).send(err)
+  //     }
+  //   })
+
+  //   const user = await User.findById(decodedToken.id)
+  //   console.log('user', user)
+
+  //   const profile = new Profile({
+  //     portfolio: `/uploads/${req.body.username}/${file.name}`,
+  //     user: user._id
+  //   })
+
+  //   const savedPortfolio = await profile.save()
+  //   res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/${file.name}` })
+  //   res.json(savedPortfolio)
+
+  // })
 
 })
 

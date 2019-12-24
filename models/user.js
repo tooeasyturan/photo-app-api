@@ -16,6 +16,12 @@ const userSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Profile'
     }
+  ],
+  avatar: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Avatar'
+    }
   ]
 })
 

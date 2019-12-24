@@ -3,6 +3,8 @@ const usersRouter = require('express').Router()
 const User = require('../models/user')
 const Profile = require('../models/profile')
 const jwt = require('jsonwebtoken')
+const Avatar = require('../models/avatar')
+
 
 const getTokenFrom = request => {
   const authorization = request.get('authorization')
@@ -24,7 +26,6 @@ usersRouter.post('/', async (request, response, next) => {
       firstName: body.firstName,
       lastName: body.lastName,
       username: body.username,
-      // name: body.name,
       email: body.email,
       date: new Date(),
       password: body.password,
@@ -75,7 +76,7 @@ usersRouter.post('/profile', async (request, response, next) => {
 
 
 usersRouter.get('/', async (request, response) => {
-  const users = await User.find({}).populate('profile')
+  const users = await User.find({}).populate('profile').populate('avatar')
   response.json(users.map(u => u.toJSON()))
 })
 
