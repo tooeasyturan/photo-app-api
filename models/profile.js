@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
 
 const profileSchema = new mongoose.Schema({
-  location: String,
+  country: String,
+  region: String,
   description: String,
   experience: String,
   shootingStyle: String,

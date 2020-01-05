@@ -84,7 +84,7 @@ uploadsRouter.post('/avatar', async (req, res, next) => {
 
 
     const avatar = new Avatar({
-      avatar: `/uploads/${req.body.username}/avatar/${file.name}`,
+      avatar: `${file.name}`,
       user: user._id
     })
 
@@ -168,7 +168,7 @@ uploadsRouter.get('/avatar/:username', async (req, res) => {
       console.log('user', user)
 
       const portfolio = new Portfolio({
-        portfolio: `/uploads/${req.body.username}/${file.name}`,
+        portfolio: `/${file.name}`,
         user: user._id
       })
 
