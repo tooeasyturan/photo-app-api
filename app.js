@@ -10,6 +10,7 @@ const fileupload = require('express-fileupload')
 const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
 const uploadsRouter = require('./controllers/uploads')
+const authRouter = require('./controllers/auth')
 const path = require('path')
 //const uploadsmulterRouter = require('./controllers/uploadsmulter')
 
@@ -35,6 +36,7 @@ app.use(fileupload())
 
 app.use('/users', usersRouter)
 app.use('/login', loginRouter)
+app.use('/auth', authRouter)
 app.use(uploadsRouter)
 // app.use('/upload', uploadsmulterRouter)
 

@@ -10,6 +10,7 @@ const userSchema = mongoose.Schema({
   lastName: String,
   email: String,
   date: Date,
+  status: String,
   passwordHash: String,
   profile: [
     {

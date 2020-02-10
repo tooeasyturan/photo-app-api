@@ -27,6 +27,7 @@ usersRouter.post('/', async (request, response, next) => {
       lastName: body.lastName,
       username: body.username,
       email: body.email,
+      status: body.status,
       date: new Date(),
       password: body.password,
       passwordHash
@@ -121,6 +122,43 @@ usersRouter.get('/:username', async (req, res, next) => {
   res.json(user)
 }
 )
+
+
+// @route DELETE users/:username
+// @desc Delete profile and user
+// @access private
+
+usersRouter.delete('/profile', async (request, response, next) => {
+
+
+  const token = getTokenFrom(request)
+
+  try {
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+    if (!token || !decodedToken.id) {
+      return response.status(401).json({ error: 'token missing or invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
+    console.log('user id', user.id)
+
+    // Remove profile
+    await Profile.findOneAndRemove({ user: user.id })
+    console.log('Profile deleted')
+    // Remove user
+    await User.findOneAndRemove({ _id: user.id })
+    console.log('user deleted')
+
+    response.json({ msg: 'User deleted ' })
+  } catch (error) {
+    console.log(error)
+  }
+
+}
+)
+
+
+
 
 
 module.exports = usersRouter

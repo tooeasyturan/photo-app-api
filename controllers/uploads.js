@@ -48,6 +48,7 @@ const getTokenFrom = request => {
 // })
 
 uploadsRouter.post('/avatar', async (req, res, next) => {
+  console.log('TESTING')
   const body = req.body
   console.log('req.body', req.body)
   const token = getTokenFrom(req)
@@ -134,31 +135,36 @@ uploadsRouter.get('/avatar/:username', async (req, res) => {
 
 
   uploadsRouter.post('/', async (req, res, next) => {
+    console.log('TESTING PORTFOLIO UPLOAD')
     const body = req.body
     console.log('body', body)
 
     const token = getTokenFrom(req)
+    console.log('TOKEN', token)
 
 
 
-    if (!fs.existsSync(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`)) {
-      fs.mkdir(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`), function (err) {
-        if (err) {
-          return console.error(err)
-        }
-        console.log("Directory created successfully!")
-      }
-    }
 
-    const file = await req.files.file
-    file.mv(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/${file.name}`, err => {
-      if (err) {
-        console.log(err)
-        return res.status(500).send(err)
-      }
-    })
 
     try {
+      if (!fs.existsSync(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`)) {
+        fs.mkdir(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`, err => {
+          if (err) {
+            console.error(err)
+          }
+          console.log("Directory created successfully!")
+        })
+      }
+
+      const file = await req.files.file
+      file.mv(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/${file.name}`, err => {
+        if (err) {
+          console.log(err)
+          return res.status(500).send(err)
+        }
+      })
+
+
       const decodedToken = jwt.verify(token, process.env.SECRET)
       if (!token || !decodedToken.id) {
         return response.status(401).json({ error: 'token missing or invalid' })

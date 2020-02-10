@@ -29,8 +29,29 @@ const errorHandler = (error, request, response, next) => {
   next(error)
 }
 
+const auth = (request, response, next) => {
+  // Get token from header
+  const token = request.header('x-auth-token')
+
+  // Check if no token
+  if (!token) {
+    return response.status(401).json({ msg: 'No token, authorization denied' })
+  }
+
+  // Verify token
+  try {
+    const decoded = jwt.verify(token, config.get(process.env.SECRET))
+
+    request.user = decoded.user;
+    next()
+  } catch (error) {
+    response.status(401).json({ msg: 'Token is not valid' })
+  }
+}
+
 module.exports = {
   requestLogger,
   unknownEndpoint,
-  errorHandler
+  errorHandler,
+  auth
 }
