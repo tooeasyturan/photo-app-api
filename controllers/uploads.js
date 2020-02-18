@@ -143,9 +143,6 @@ uploadsRouter.get('/avatar/:username', async (req, res) => {
     console.log('TOKEN', token)
 
 
-
-
-
     try {
       if (!fs.existsSync(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`)) {
         fs.mkdir(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`, err => {
@@ -187,6 +184,10 @@ uploadsRouter.get('/avatar/:username', async (req, res) => {
     }
 
   })
+
+
+
+
 
 })
 
