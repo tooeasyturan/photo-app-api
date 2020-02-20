@@ -1,9 +1,11 @@
 const bcrypt = require('bcrypt')
 const usersRouter = require('express').Router()
+const fs = require("fs")
 const User = require('../models/user')
 const Profile = require('../models/profile')
 const jwt = require('jsonwebtoken')
 const Avatar = require('../models/avatar')
+const Portfolio = require('../models/portfolio')
 
 
 const getTokenFrom = request => {
@@ -173,8 +175,20 @@ usersRouter.delete('/portfolio', async (request, response, next) => {
     console.log('user portfolio', user.portfolio)
     console.log('body', request.body)
 
+
     const imageToDelete = request.body.portfolioPic
     console.log('image to delete', imageToDelete)
+
+    await Portfolio.findOneAndRemove({ portfolio: `/${imageToDelete}` })
+
+    try {
+      fs.unlinkSync(`/Users/joshturan/tfp-frontend/public/uploads/${user.username}/${imageToDelete}`)
+    } catch (error) {
+      console.log(error)
+    }
+
+
+
 
     // // Remove profile
     // await Profile.findOneAndRemove({ user: user.id })
@@ -183,7 +197,7 @@ usersRouter.delete('/portfolio', async (request, response, next) => {
     // await User.findOneAndRemove({ _id: user.id })
     // console.log('user deleted')
 
-    // response.json({ msg: 'User deleted ' })
+    response.json({ msg: 'Image deleted ' })
   } catch (error) {
     console.log(error)
   }
