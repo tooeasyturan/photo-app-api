@@ -78,15 +78,35 @@ uploadsRouter.post('/avatar', async (req, res, next) => {
     })
 
 
+
+
     const decodedToken = jwt.verify(token, process.env.SECRET)
     if (!token || !decodedToken.id) {
       return res.status(401).json({ error: 'token missing or invalid' })
     }
 
+
+
+
+
     const user = await User.findById(decodedToken.id)
 
+    let avatar = await Avatar.findOne({ user: user.id })
 
-    const avatar = new Avatar({
+    const profileFields = {
+      avatar: `${file.name}`,
+      user: user._id
+    }
+
+    if (avatar) {
+      // UPDATE
+      console.log('FOUND AND UPDATED AVATAR')
+
+      avatar = await Avatar.findOneAndUpdate({ user: user.id }, { $set: profileFields }, { new: true })
+      return res.json(avatar)
+    }
+
+    avatar = new Avatar({
       avatar: `${file.name}`,
       user: user._id
     })
