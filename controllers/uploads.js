@@ -151,7 +151,7 @@ uploadsRouter.get('/avatar/:username', async (req, res) => {
     if (err) {
       return console.log('Unable to scan directory: ' + err)
     }
-    console.log(files)
+    console.log('THESE ARE FILES', files)
     res.json(files)
   })
 

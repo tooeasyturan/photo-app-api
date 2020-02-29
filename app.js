@@ -7,6 +7,7 @@ const middleware = require('./utils/middleware')
 const mongoose = require('mongoose')
 const logger = require('./utils/logger')
 const fileupload = require('express-fileupload')
+const cloudinary = require('cloudinary').v2;
 const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
 const uploadsRouter = require('./controllers/uploads')
