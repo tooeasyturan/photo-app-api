@@ -16,36 +16,6 @@ const getTokenFrom = request => {
   return null
 }
 
-// uploadsRouter.post('/', async (req, res) => {
-
-//   console.log('req.body', req.body)
-//   if (req.files === null) {
-//     return res.status(400).json({ msg: 'No file uploaded' })
-//   }
-
-//   if (!fs.existsSync(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`)) {
-//     fs.mkdir(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`, function (err) {
-//       if (err) {
-//         return console.error(err);
-//       }
-//       console.log("Directory created successfully!");
-//     });
-//   }
-
-//   const file = await req.files.file
-//   file.mv(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/${file.name}`, err => {
-//     if (err) {
-//       console.log(err)
-//       return res.status(500).send(err)
-//     }
-
-
-
-//     console.log('file name', file)
-//     res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/${file.name}` })
-
-//   })
-// })
 
 uploadsRouter.post('/avatar', async (req, res, next) => {
   console.log('TESTING')
@@ -154,58 +124,6 @@ uploadsRouter.get('/avatar/:username', async (req, res) => {
     console.log('THESE ARE FILES', files)
     res.json(files)
   })
-
-
-  // uploadsRouter.post('/', async (req, res, next) => {
-  //   console.log('TESTING PORTFOLIO UPLOAD')
-  //   const body = req.body
-  //   console.log('body', body)
-
-  //   const token = getTokenFrom(req)
-  //   console.log('TOKEN', token)
-
-
-  //   try {
-  //     if (!fs.existsSync(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`)) {
-  //       fs.mkdir(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`, err => {
-  //         if (err) {
-  //           console.error(err)
-  //         }
-  //         console.log("Directory created successfully!")
-  //       })
-  //     }
-
-  //     const file = await req.files.file
-  //     file.mv(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/${file.name}`, err => {
-  //       if (err) {
-  //         console.log(err)
-  //         return res.status(500).send(err)
-  //       }
-  //     })
-
-
-  //     const decodedToken = jwt.verify(token, process.env.SECRET)
-  //     if (!token || !decodedToken.id) {
-  //       return res.status(401).json({ error: 'token missing or invalid' })
-  //     }
-
-  //     const user = await User.findById(decodedToken.id)
-  //     console.log('user', user)
-
-  //     const portfolio = new Portfolio({
-  //       portfolio: `/${file.name}`,
-  //       user: user._id
-  //     })
-
-  //     const savedPortfolio = await portfolio.save()
-  //     user.portfolio = user.portfolio.concat(savedPortfolio._id)
-  //     await user.save()
-  //     res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/${file.name}` })
-  //   } catch (exception) {
-  //     next(exception)
-  //   }
-
-  // })
 
 
 

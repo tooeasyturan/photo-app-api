@@ -12,6 +12,7 @@ const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
 const uploadsRouter = require('./controllers/uploads')
 const authRouter = require('./controllers/auth')
+const cloudinaryRouter = require('./controllers/cloudinary')
 const path = require('path')
 //const uploadsmulterRouter = require('./controllers/uploadsmulter')
 
@@ -27,18 +28,20 @@ mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology
   })
 
 app.use(cors())
-app.use(bodyParser.json())
+app.use(bodyParser.json()).use(bodyParser.urlencoded({ extended: true }))
 app.use(middleware.requestLogger)
 app.use(middleware.errorHandler)
 // app.use(express.static('./public/uploads'))
 app.use(express.static(__dirname + '/public/uploads/'))
 
-app.use(fileupload())
+// app.use(fileupload())
 
 app.use('/users', usersRouter)
 app.use('/login', loginRouter)
 app.use('/auth', authRouter)
 app.use(uploadsRouter)
+app.use('/cloudinary', cloudinaryRouter)
+
 // app.use('/upload', uploadsmulterRouter)
 
 

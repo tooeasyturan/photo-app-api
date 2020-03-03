@@ -29,6 +29,12 @@ const userSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Portfolio'
     }
+  ],
+  cloudinaryUpload: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Cloudinary'
+    }
   ]
 })
 

@@ -119,7 +119,7 @@ usersRouter.get('/', async (request, response) => {
 // })
 
 usersRouter.get('/:username', async (req, res, next) => {
-  const user = await User.find({ username: req.params.username }).populate('profile').populate('avatar').populate('portfolio')
+  const user = await User.find({ username: req.params.username }).populate('profile').populate('avatar').populate('portfolio').populate('cloudinaryUpload')
   console.log(user)
   res.json(user)
 }
