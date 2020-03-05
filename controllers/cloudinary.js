@@ -66,12 +66,12 @@ cloudinaryRouter.get('/:username', async (req, res) => {
   console.log('test')
   console.log('username params', req.params.username)
 
-  const token = getTokenFrom(req)
+  // const token = getTokenFrom(req)
 
-  const decodedToken = jwt.verify(token, process.env.SECRET)
-  if (!token || !decodedToken.id) {
-    return response.status(401).json({ error: 'token missing or invalid' })
-  }
+  // const decodedToken = jwt.verify(token, process.env.SECRET)
+  // if (!token || !decodedToken.id) {
+  //   return response.status(401).json({ error: 'token missing or invalid' })
+  // }
 
   // const user = await User.findById(decodedToken.id).populate('cloudinaryUpload')
   // console.log('USERNAME!!!!!!', user.username)
@@ -92,5 +92,35 @@ cloudinaryRouter.get('/:username', async (req, res) => {
     res.status(404).send('not found')
   }
 })
+
+cloudinaryRouter.delete('/', async (request, response, next) => {
+  // NEED TO FIGURE OUT HOW TO GET OBJECT ID FOR SPECIFIC IMAGE TO BE DELETED
+  // PROBABLY BETTER TO USE REQUEST PARAMS WITH IMAGE NAME OR ID FOR DELETE REQUEST
+
+  const token = getTokenFrom(request)
+
+  try {
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+    if (!token || !decodedToken.id) {
+      return response.status(401).json({ error: 'token missing or invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
+    console.log('user id', user.id)
+    console.log('user portfolio', user.portfolio)
+    console.log('body', request.body)
+
+
+    const imageToDelete = request.body.upload
+    console.log('image to delete', imageToDelete)
+
+    await Cloudinary.findOneAndRemove({ portfolio: imageToDelete })
+
+    response.json({ msg: 'Image deleted ' })
+  } catch (error) {
+    console.log(error)
+  }
+}
+)
 
 module.exports = cloudinaryRouter
