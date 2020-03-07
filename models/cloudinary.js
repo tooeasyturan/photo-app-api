@@ -1,19 +1,6 @@
 const mongoose = require('mongoose')
 
 const cloudinarySchema = new mongoose.Schema({
-  // imageName: {
-  //   type: String,
-  //   required: true
-  // },
-
-  // cloudImage: {
-  //   type: String,
-  //   required: true
-  // },
-
-  // imageId: {
-  //   type: String
-  // },
 
   portfolio: String,
   user: {

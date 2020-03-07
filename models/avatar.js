@@ -16,4 +16,4 @@ avatarSchema.set('toJSON', {
   }
 })
 
-module.exports = mongoose.model('Avatar', avatarSchema)
+module.exports = mongoose.model('CloudAvatar', avatarSchema)

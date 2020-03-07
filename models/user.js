@@ -18,12 +18,12 @@ const userSchema = mongoose.Schema({
       ref: 'Profile'
     }
   ],
-  avatar: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Avatar'
-    }
-  ],
+  // avatar: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: 'Avatar'
+  //   }
+  // ],
   portfolio: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -34,6 +34,12 @@ const userSchema = mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Cloudinary'
+    }
+  ],
+  avatarCloudUpload: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CloudAvatar'
     }
   ]
 })
