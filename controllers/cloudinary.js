@@ -7,6 +7,9 @@ const cloud = require('../utils/cloudinaryConfig')
 const jwt = require('jsonwebtoken')
 const path = require('path')
 const upload = require('../utils/multerConfig');
+const middleware = require('../utils/middleware')
+
+const auth = middleware.auth
 
 
 const getTokenFrom = request => {

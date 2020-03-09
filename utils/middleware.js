@@ -1,5 +1,7 @@
 const logger = require('./logger')
 const jwt = require('jsonwebtoken')
+const User = require('../models/user')
+
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method)
@@ -29,23 +31,36 @@ const errorHandler = (error, request, response, next) => {
   next(error)
 }
 
-const auth = (request, response, next) => {
+const auth = async (req, res, next) => {
+
+  const getTokenFrom = req => {
+    const authorization = req.get('authorization')
+    if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+      return authorization.substring(7)
+    }
+    return null
+  }
   // Get token from header
-  const token = request.header('x-auth-token')
+  const token = getTokenFrom(req)
+  console.log(token)
 
   // Check if no token
   if (!token) {
-    return response.status(401).json({ msg: 'No token, authorization denied' })
+    return res.status(401).json({ msg: 'No token, authorization denied' })
   }
 
   // Verify token
   try {
-    const decoded = jwt.verify(token, config.get(process.env.SECRET))
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+    console.log('decoded token', decodedToken)
 
-    request.user = decoded.user;
+    // const user = await User.findById(decodedToken.id)
+    req.user = decodedToken
+    console.log('USERRR ID', req.user.id)
     next()
   } catch (error) {
-    response.status(401).json({ msg: 'Token is not valid' })
+    console.log(error)
+    res.status(401).json({ msg: 'Token is not valid' })
   }
 }
 
