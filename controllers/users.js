@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt')
+const express = require('express')
 const usersRouter = require('express').Router()
 const fs = require("fs")
 const User = require('../models/user')
@@ -6,6 +7,7 @@ const Profile = require('../models/profile')
 const jwt = require('jsonwebtoken')
 const Avatar = require('../models/avatar')
 const Portfolio = require('../models/portfolio')
+const { check, validationResult } = require('express-validator')
 
 
 const getTokenFrom = request => {
@@ -17,30 +19,54 @@ const getTokenFrom = request => {
 }
 
 
-usersRouter.post('/', async (request, response, next) => {
-  try {
+usersRouter.post('/',
+  [
+    // check('firstName', 'First name is required').not().isEmpty(),
+    // check('lastName', 'Last name is required').not().isEmpty(),
+    check('email', 'Please include a valid email').isEmail()
+  ],
+  async (request, response) => {
+
+
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+      console.log(errors)
+      return response.status(400).json({ errors: errors.array() });
+    }
+
     const body = request.body
 
-    const saltRounds = 10
-    const passwordHash = await bcrypt.hash(body.password, saltRounds)
 
-    const user = new User({
-      firstName: body.firstName,
-      lastName: body.lastName,
-      username: body.username,
-      email: body.email,
-      status: body.status,
-      date: new Date(),
-      password: body.password,
-      passwordHash
-    })
+    try {
 
-    const savedUser = await user.save()
-    response.json(savedUser)
-  } catch (exception) {
-    next(exception)
-  }
-})
+      let user = await User.findOne({ email: body.email })
+
+      if (user) {
+        console.log(errors)
+        return response.status(400).json({ errors: [{ msg: 'User already exists with this email', param: 'userExists' }] })
+      }
+
+
+      const saltRounds = 10
+      const passwordHash = await bcrypt.hash(body.password, saltRounds)
+
+      user = new User({
+        firstName: body.firstName,
+        lastName: body.lastName,
+        username: body.username,
+        email: body.email,
+        status: body.status,
+        date: new Date(),
+        password: body.password,
+        passwordHash
+      })
+
+      const savedUser = await user.save()
+      response.json(savedUser)
+    } catch (err) {
+      console.log('ERRRRR', err)
+    }
+  })
 
 // @route POST /profile
 // @desc Create or update user profile
@@ -102,6 +128,11 @@ usersRouter.get('/', async (request, response) => {
   const users = await User.find({}).populate('profile').populate('avatar')
   response.json(users.map(u => u.toJSON()))
 })
+
+
+
+
+
 
 // usersRouter.get('/:id', async (request, response, next) => {
 //   try {

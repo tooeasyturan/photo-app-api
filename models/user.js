@@ -6,11 +6,27 @@ const userSchema = mongoose.Schema({
     type: String,
     unique: true
   },
-  firstName: String,
-  lastName: String,
-  email: String,
-  date: Date,
-  status: String,
+  firstName: {
+    type: String,
+    required: true
+  },
+  lastName: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  date: {
+    type: Date,
+    required: Date.now
+  },
+  status: {
+    type: String,
+    // required: true
+  },
   passwordHash: String,
   profile: [
     {
