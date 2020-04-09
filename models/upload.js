@@ -1,20 +1,14 @@
 const mongoose = require('mongoose')
 
-const cloudinarySchema = new mongoose.Schema({
-
+const uploadSchema = new mongoose.Schema({
   portfolio: String,
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
-
-  // postDate: {
-  //   type: Date,
-  //   default: Date.now
-  // }
 })
 
-cloudinarySchema.set('toJSON', {
+uploadSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
@@ -22,4 +16,4 @@ cloudinarySchema.set('toJSON', {
   }
 })
 
-module.exports = mongoose.model('Cloudinary', cloudinarySchema)
+module.exports = mongoose.model('Upload', uploadSchema)

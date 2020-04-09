@@ -40,22 +40,22 @@ const userSchema = mongoose.Schema({
   //     ref: 'Avatar'
   //   }
   // ],
-  portfolio: [
+  // portfolio: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: 'Portfolio'
+  //   }
+  // ],
+  upload: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Portfolio'
+      ref: 'Upload'
     }
   ],
-  cloudinaryUpload: [
+  avatar: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Cloudinary'
-    }
-  ],
-  avatarCloudUpload: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'CloudAvatar'
+      ref: 'Avatar'
     }
   ]
 })

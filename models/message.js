@@ -1,14 +1,20 @@
 const mongoose = require('mongoose')
 
-const avatarSchema = new mongoose.Schema({
-  avatar: String,
-  user: {
+const messageSchema = new mongoose.Schema({
+  message: [{
+    sender: String,
+    content: String,
+    date: Date,
+  }],
+  convoId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'Convo'
   }
 })
 
-avatarSchema.set('toJSON', {
+
+
+messageSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
@@ -16,4 +22,4 @@ avatarSchema.set('toJSON', {
   }
 })
 
-module.exports = mongoose.model('Avatar', avatarSchema)
+module.exports = mongoose.model('Message', messageSchema)

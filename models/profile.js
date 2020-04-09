@@ -5,7 +5,7 @@ const profileSchema = new mongoose.Schema({
   region: String,
   description: String,
   experience: String,
-  shootingStyle: String,
+  shootingStyle: [String],
   website: String,
   socialMedia: String,
   user: {
