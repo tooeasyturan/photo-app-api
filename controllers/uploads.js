@@ -1,11 +1,14 @@
 const uploadsRouter = require('express').Router()
-const bcrypt = require('bcrypt')
+const cloudinary = require('cloudinary')
 const User = require('../models/user')
-const fs = require("fs")
-const Profile = require('../models/profile')
-const jwt = require('jsonwebtoken')
+const Upload = require('../models/upload')
 const Avatar = require('../models/avatar')
-const Portfolio = require('../models/portfolio')
+const cloud = require('../utils/cloudinaryConfig')
+const jwt = require('jsonwebtoken')
+const upload = require('../utils/multerConfig');
+const middleware = require('../utils/middleware')
+
+const auth = middleware.auth
 
 
 const getTokenFrom = request => {
@@ -17,79 +20,105 @@ const getTokenFrom = request => {
 }
 
 
-uploadsRouter.post('/avatar', async (req, res, next) => {
-  console.log('TESTING')
-  const body = req.body
-  console.log('req.body', req.body)
-  const token = getTokenFrom(req)
-  console.log('token', token)
 
-  // if (req.files === null) {
-  //   return res.status(400).json({ msg: 'No file uploaded' })
-  // }
+
+uploadsRouter.post('/', upload.single('file'), async (req, res) => {
+
+  console.log('BODY', req.body.username)
+
+  // res.send(req.file)
+  const token = getTokenFrom(req)
+  console.log('TOKEN', token)
+
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  if (!token || !decodedToken.id) {
+    return res.status(401).json({ error: 'token missing or invalid' })
+  }
+
+  const user = await User.findById(decodedToken.id)
+  console.log('user ID', user.id)
 
   try {
-    if (!fs.existsSync(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/avatar`)) {
-      await fs.promises.mkdir(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/avatar`,
-        { recursive: true }, err => {
-          if (err) {
-            console.error(err);
-          }
-          console.log("Directory created successfully!");
-        });
-    }
-
-    const file = await req.files.file
-    file.mv(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/avatar/${file.name}`, err => {
-      if (err) {
-        console.log(err)
-        return res.status(500).send(err)
-      }
+    console.log('FILE', req.body)
+    req.file.originalname = req.file.originalname.replace(/\.[^/.]+$/, "")
+    const result = await cloudinary.v2.uploader.upload(req.file.path, {
+      public_id: `${req.body.username}/portfolio/${req.file.originalname}`,
+      overwrite: false
     })
 
-
-
-
-    const decodedToken = jwt.verify(token, process.env.SECRET)
-    if (!token || !decodedToken.id) {
-      return res.status(401).json({ error: 'token missing or invalid' })
-    }
-
-
-
-
-
-    const user = await User.findById(decodedToken.id)
-
-    let avatar = await Avatar.findOne({ user: user.id })
-
-    const profileFields = {
-      avatar: `${file.name}`,
+    const upload = new Upload({
+      portfolio: result.url,
       user: user._id
-    }
+    })
+
+    const savedUpload = await upload.save()
+    console.log('savedCloudinaryUpload', upload)
+    console.log('user.cloudinaryUpload', user.upload)
+    user.upload = user.upload.concat(savedUpload._id)
+    await user.save()
+
+    res.send(result)
+  } catch (error) {
+    console.log(error)
+  }
+
+})
+
+uploadsRouter.post('/avatar', upload.single('file'), async (req, res) => {
+
+
+  console.log('BODY', req.body.username)
+
+  // res.send(req.file)
+
+
+  const token = getTokenFrom(req)
+  console.log('TOKEN', token)
+
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  if (!token || !decodedToken.id) {
+    return res.status(401).json({ error: 'token missing or invalid' })
+  }
+
+  const user = await User.findById(decodedToken.id)
+  console.log('user ID', user.id)
+
+  let avatar = await Avatar.findOne({ user: user.id })
+  console.log('IS THERE AVATAR??!', avatar)
+
+
+
+  try {
+    req.file.originalname = req.file.originalname.replace(/\.[^/.]+$/, "")
+    const result = await cloudinary.v2.uploader.upload(req.file.path, {
+      public_id: `${req.body.username}/avatar/${req.file.originalname}`,
+      overwrite: false
+    })
 
     if (avatar) {
-      // UPDATE
-      console.log('FOUND AND UPDATED AVATAR')
 
-      avatar = await Avatar.findOneAndUpdate({ user: user.id }, { $set: profileFields }, { new: true })
+      await Avatar.findOneAndUpdate({ user: user.id }, { $set: { avatar: result.url } }, { new: true })
       return res.json(avatar)
     }
 
     avatar = new Avatar({
-      avatar: `${file.name}`,
+      avatar: result.url,
       user: user._id
     })
 
     const savedAvatar = await avatar.save()
+    console.log('USER!!!!', user)
+    console.log('avatarCloudUpload!!!!', avatar)
+    console.log('savedAvatarCloudUpload!!!!', savedAvatar._id)
+
+    console.log('user.avatarCloudUpload', user.avatar)
     user.avatar = user.avatar.concat(savedAvatar._id)
     await user.save()
-    console.log('saved avatar', savedAvatar)
-    res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/avatar/${file.name}` })
-  } catch (exception) {
-    next(exception)
-  }
 
+    res.send(result)
+  } catch (error) {
+    console.log(error)
+  }
 
 })
 
@@ -98,93 +127,97 @@ uploadsRouter.get('/:username', async (req, res) => {
   console.log('test')
   console.log('username params', req.params.username)
 
-  const uploadsFolder = `/Users/joshturan/tfp-frontend/public/uploads/${req.params.username}/`
-  console.log('uploads folder', uploadsFolder)
+  // const token = getTokenFrom(req)
 
-  fs.readdir(uploadsFolder, (err, files) => {
-    if (err) {
-      return console.log('Unable to scan directory: ' + err)
-    }
-    res.json(files)
-  })
+  // const decodedToken = jwt.verify(token, process.env.SECRET)
+  // if (!token || !decodedToken.id) {
+  //   return response.status(401).json({ error: 'token missing or invalid' })
+  // }
 
+  // const user = await User.findById(decodedToken.id).populate('cloudinaryUpload')
+  // console.log('USERNAME!!!!!!', user.username)
+  const user = await User.find({ username: req.params.username }).populate('cloudinaryUpload')
+  console.log("USER!!!!", user)
+
+
+  if (user.length === 1) {
+    // IF (REQ.PARAMS.USERNAME === USER.USERNAME) THEN SHOW MY PROFILE
+    const images = await Upload.find({ user: user[0].id }) //** CONTINUE TRYING THIS METHOD. FIND IMAGES BY USER.ID. SHOULD BE EASY. */
+    const mappedImages = images.map(image => image.portfolio)
+    console.log('IMAGES', mappedImages)
+    // const portfolio = user[0].cloudinaryUpload
+    // const images = portfolio.map(image => image)
+    res.send(mappedImages)
+  } else {
+    // IF (REQ.PARAMS.USERNAME !== USER.USERNAME) THEN SHOW USERNAME PROFILE OR INVALID USER PAGE
+    res.status(404).send('not found')
+  }
 })
 
-uploadsRouter.get('/avatar/:username', async (req, res) => {
-  console.log('test')
-  console.log('username params', req.params.username)
-
-  const avatarFolder = `/Users/joshturan/tfp-frontend/public/uploads/${req.params.username}/avatar/`
-  console.log('avatar folder', avatarFolder)
-
-  fs.readdir(avatarFolder, (err, files) => {
-    if (err) {
-      return console.log('Unable to scan directory: ' + err)
-    }
-    console.log('THESE ARE FILES', files)
-    res.json(files)
-  })
+uploadsRouter.get('/:username/avatar', async (req, res) => {
+  const user = await User.find({ username: req.params.username }).populate('avatar')
+  console.log("USER!!!!", user)
 
 
-
-  uploadsRouter.post('/', async (req, res, next) => {
-    console.log('TESTING PORTFOLIO UPLOAD')
-    const body = req.body
-    console.log('body', body)
-
-    const token = getTokenFrom(req)
-    console.log('TOKEN', token)
-
-
-    try {
-      if (!fs.existsSync(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`)) {
-        await fs.promises.mkdir(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}`, { recursive: true },
-          err => {
-            if (err) {
-              console.error(err)
-            }
-            console.log("Directory created successfully!")
-          })
-      }
-
-      const file = await req.files.file
-      file.mv(`/Users/joshturan/tfp-frontend/public/uploads/${req.body.username}/${file.name}`, err => {
-        if (err) {
-          console.log(err)
-          return res.status(500).send(err)
-        }
-      })
-
-
-      const decodedToken = jwt.verify(token, process.env.SECRET)
-      if (!token || !decodedToken.id) {
-        return res.status(401).json({ error: 'token missing or invalid' })
-      }
-
-      const user = await User.findById(decodedToken.id)
-      console.log('user', user)
-
-      const portfolio = new Portfolio({
-        portfolio: `/${file.name}`,
-        user: user._id
-      })
-
-      const savedPortfolio = await portfolio.save()
-      user.portfolio = user.portfolio.concat(savedPortfolio._id)
-      await user.save()
-      res.json({ fileName: file.name, filePath: `/uploads/${req.body.username}/${file.name}` })
-    } catch (exception) {
-      next(exception)
-    }
-
-  })
-
-
-
-
-
-
+  if (user.length === 1) {
+    const images = await Avatar.find({ user: user[0].id })
+    const mappedImages = images.map(image => image.avatar)
+    console.log('IMAGES', mappedImages)
+    res.send(mappedImages)
+  } else {
+    res.status(404).send('not found')
+  }
 })
 
+
+uploadsRouter.delete('/', async (request, response, next) => {
+  // NEED TO FIGURE OUT HOW TO GET OBJECT ID FOR SPECIFIC IMAGE TO BE DELETED
+  // PROBABLY BETTER TO USE REQUEST PARAMS WITH IMAGE NAME OR ID FOR DELETE REQUEST
+
+  const token = getTokenFrom(request)
+
+  try {
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+    if (!token || !decodedToken.id) {
+      return response.status(401).json({ error: 'token missing or invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
+    console.log('user id', user.id)
+    console.log('user portfolio', user.portfolio)
+    console.log('body', request.body)
+
+
+    const imageToDelete = request.body.upload
+    console.log('image to delete', imageToDelete)
+
+    const imageToDeleteId = Upload.find({ portfolio: imageToDelete }, { lean: true }, function (err, results) {
+      return results[0]._id
+    })
+    console.log('IMAGE TO DELETE ID', imageToDeleteId._id)
+    const remove = await Upload.findOne({ portfolio: imageToDelete })
+
+    console.log('IMAGE ID TO REMOVE OBJECT', remove._id)
+    await Upload.findOneAndRemove({ portfolio: imageToDelete })
+    // console.log(User.findOneAndRemove({ cloudinaryUpload: remove._id }))
+
+    console.log('CLOUDINARY UPLOADS ARRY', user.cloudinaryUpload)
+
+    User.update(
+      { _id: user.id },
+      { $pull: { cloudinaryUpload: remove._id } },
+      function (err) {
+        if (err) console.log(err)
+      }
+    )
+
+
+
+    response.json({ msg: 'Image deleted ' })
+  } catch (error) {
+    console.log(error)
+  }
+}
+)
 
 module.exports = uploadsRouter

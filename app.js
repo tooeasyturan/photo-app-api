@@ -1,6 +1,7 @@
+const bodyParser = require('body-parser')
 const config = require('./utils/config')
 const express = require('express')
-const bodyParser = require('body-parser')
+
 const app = express()
 const cors = require('cors')
 const middleware = require('./utils/middleware')
@@ -10,11 +11,11 @@ const fileupload = require('express-fileupload')
 const cloudinary = require('cloudinary').v2;
 const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
-const uploadsRouter = require('./controllers/uploads')
 const authRouter = require('./controllers/auth')
-const cloudinaryRouter = require('./controllers/cloudinary')
-const path = require('path')
-//const uploadsmulterRouter = require('./controllers/uploadsmulter')
+const uploadsRouter = require('./controllers/uploads')
+const convosRouter = require('./controllers/convos')
+
+
 
 
 logger.info('connecting to', config.MONGODB_URI)
@@ -37,18 +38,16 @@ app.use(cors())
 app.use(bodyParser.json()).use(bodyParser.urlencoded({ extended: true }))
 app.use(middleware.requestLogger)
 app.use(middleware.errorHandler)
-// app.use(express.static('./public/uploads'))
-app.use(express.static(__dirname + '/public/uploads/'))
 
-// app.use(fileupload())
 
+app.use('/messages', convosRouter)
 app.use('/users', usersRouter)
 app.use('/login', loginRouter)
 app.use('/auth', authRouter)
-app.use(uploadsRouter)
-app.use('/cloudinary', cloudinaryRouter)
+app.use('/uploads', uploadsRouter)
 
-// app.use('/upload', uploadsmulterRouter)
+
+console.log(app.routes)
 
 
 

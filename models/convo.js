@@ -2,13 +2,10 @@ const mongoose = require('mongoose')
 
 const convoSchema = new mongoose.Schema({
   members: [String],
-  // messages: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: 'Message'
-  // }
-  // userFrom: String,
-  // userTo: String,
-  // messages: [String]
+  sender: String,
+  deleteBySender: String,
+  receiver: String,
+  deleteByReceiver: String,
 }, { versionKey: false })
 
 

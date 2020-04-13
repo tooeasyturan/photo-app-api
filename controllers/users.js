@@ -6,7 +6,6 @@ const User = require('../models/user')
 const Profile = require('../models/profile')
 const jwt = require('jsonwebtoken')
 const Avatar = require('../models/avatar')
-const Portfolio = require('../models/portfolio')
 const { check, validationResult } = require('express-validator')
 
 
@@ -127,6 +126,7 @@ usersRouter.post('/profile', async (request, response, next) => {
 usersRouter.get('/', async (request, response) => {
   const users = await User.find({}).populate('profile').populate('avatar')
   response.json(users.map(u => u.toJSON()))
+  console.log('get users', users)
 })
 
 
@@ -150,7 +150,7 @@ usersRouter.get('/', async (request, response) => {
 // })
 
 usersRouter.get('/:username', async (req, res, next) => {
-  const user = await User.find({ username: req.params.username }).populate('profile').populate('avatarCloudUpload').populate('cloudinaryUpload')
+  const user = await User.find({ username: req.params.username }).populate('profile').populate('avatar').populate('upload')
   console.log(user)
   res.json(user)
 }
@@ -189,51 +189,7 @@ usersRouter.delete('/profile', async (request, response, next) => {
 }
 )
 
-usersRouter.delete('/portfolio', async (request, response, next) => {
-  // NEED TO FIGURE OUT HOW TO GET OBJECT ID FOR SPECIFIC IMAGE TO BE DELETED
-  // PROBABLY BETTER TO USE REQUEST PARAMS WITH IMAGE NAME OR ID FOR DELETE REQUEST
 
-  const token = getTokenFrom(request)
-
-  try {
-    const decodedToken = jwt.verify(token, process.env.SECRET)
-    if (!token || !decodedToken.id) {
-      return response.status(401).json({ error: 'token missing or invalid' })
-    }
-
-    const user = await User.findById(decodedToken.id)
-    console.log('user id', user.id)
-    console.log('user portfolio', user.portfolio)
-    console.log('body', request.body)
-
-
-    const imageToDelete = request.body.portfolioPic
-    console.log('image to delete', imageToDelete)
-
-    await Portfolio.findOneAndRemove({ portfolio: `/${imageToDelete}` })
-
-    try {
-      fs.unlinkSync(`/Users/joshturan/tfp-frontend/public/uploads/${user.username}/${imageToDelete}`)
-    } catch (error) {
-      console.log(error)
-    }
-
-
-
-
-    // // Remove profile
-    // await Profile.findOneAndRemove({ user: user.id })
-    // console.log('Profile deleted')
-    // // Remove user
-    // await User.findOneAndRemove({ _id: user.id })
-    // console.log('user deleted')
-
-    response.json({ msg: 'Image deleted ' })
-  } catch (error) {
-    console.log(error)
-  }
-}
-)
 
 
 
