@@ -34,18 +34,6 @@ const userSchema = mongoose.Schema({
       ref: 'Profile'
     }
   ],
-  // avatar: [
-  //   {
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: 'Avatar'
-  //   }
-  // ],
-  // portfolio: [
-  //   {
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: 'Portfolio'
-  //   }
-  // ],
   upload: [
     {
       type: mongoose.Schema.Types.ObjectId,

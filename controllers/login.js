@@ -3,6 +3,10 @@ const bcrypt = require('bcrypt')
 const loginRouter = require('express').Router()
 const User = require('../models/user')
 
+// @route POST /login
+// @desc Authorize user that is attempting to login
+// @access Private?
+
 loginRouter.post('/', async (request, response) => {
   const body = request.body
 

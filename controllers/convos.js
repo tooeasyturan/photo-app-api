@@ -7,29 +7,22 @@ const middleware = require('../utils/middleware')
 const auth = middleware.auth
 
 
-
+// @route POST /messages
+// @desc Send message from logged in user to selected user
+// @access Private
 convosRouter.post('/', auth, async (req, res) => {
-  console.log('Auth user for sending message', req.user.username)
-  const body = req.body
-  console.log('response body', body.userTo)
+  // const body = req.body
 
   try {
-    const user = await User.findById(req.user.id)
-    // const userTo = await User.findById(body.userTo)
+    // const user = await User.findById(req.user.id)
 
-    // console.log('USER TO', userTo)
-    console.log('user from id', user.id)
-    console.log('body message', body.message)
-
-    let convo = await Convo.find({ members: { $all: [req.user.username, body.userTo] } })
-    // let message = await Message.find({ convoId: convo[0].id })
-    // console.log('FOUND A MESSAGE', message)
+    let convo = await Convo.find({ members: { $all: [req.user.username, req.body.userTo] } })
 
     if (convo.length > 0) {
 
       const messageFields = {
         sender: req.user.username,
-        content: body.message,
+        content: req.body.message,
         date: new Date(),
       }
 
@@ -39,13 +32,12 @@ convosRouter.post('/', auth, async (req, res) => {
       return res.json(message)
     }
 
-
     const convoFields = {
-      members: [req.user.username, body.userTo],
+      members: [req.user.username, req.body.userTo],
       sender: req.user.username,
-      receiver: body.userTo,
-      deleteBySender: '',
-      deleteByReceiver: '',
+      receiver: req.body.userTo,
+      deleteBySender: null,
+      deleteByReceiver: null,
     }
     convo = new Convo(convoFields)
     const savedConvo = await convo.save()
@@ -53,7 +45,7 @@ convosRouter.post('/', auth, async (req, res) => {
     const messageFields = {
       message: {
         sender: req.user.username,
-        content: body.message,
+        content: req.body.message,
         date: new Date(),
       },
       convoId: savedConvo.id
@@ -69,6 +61,10 @@ convosRouter.post('/', auth, async (req, res) => {
   }
 })
 
+
+// @route GET /messages
+// @desc Get all conversations for logged in user
+// @access Private
 convosRouter.get('/', auth, async (req, res) => {
   let convos = await Convo.find({ members: { $all: [req.user.username] } })
   console.log('get convos', convos)
@@ -90,17 +86,11 @@ convosRouter.get('/', auth, async (req, res) => {
   //   console.log(result);
   //   res.json(result)
   // })
-
-
-
-  // for (i = 0; i <= convos.length; i++) {
-  // let message = await Message.find({ convoId: convos[0].id })
-  // messages.concat(message)
-  // }
-  // console.log('message', result)
-
 })
 
+// @route GET /messages/:id
+// @desc Get all messages by conversation id
+// @access Private
 convosRouter.get('/:id', auth, async (req, res) => {
   console.log(req.params.id)
   let messages = await Message.find({ convoId: req.params.id })
@@ -108,6 +98,10 @@ convosRouter.get('/:id', auth, async (req, res) => {
   res.json(messages)
 })
 
+
+// @route POST /messages/:id
+// @desc Hide convo for loggedInUser (req.user) who has selected remove. This route needs a lot of work.
+// @access Private
 convosRouter.post('/:id', auth, async (req, res) => {
   console.log(req.user.username)
   let convo = await Convo.find({ _id: req.params.id, })

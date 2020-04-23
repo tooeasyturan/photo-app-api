@@ -7,16 +7,14 @@ const Profile = require('../models/profile')
 const jwt = require('jsonwebtoken')
 const Avatar = require('../models/avatar')
 const { check, validationResult } = require('express-validator')
+const middleware = require('../utils/middleware')
+const auth = middleware.auth
 
 
-const getTokenFrom = request => {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    return authorization.substring(7)
-  }
-  return null
-}
 
+// @route POST /users
+// @desc Create new user using signup form
+// @access Public
 
 usersRouter.post('/',
   [
@@ -24,16 +22,15 @@ usersRouter.post('/',
     // check('lastName', 'Last name is required').not().isEmpty(),
     check('email', 'Please include a valid email').isEmail()
   ],
-  async (request, response) => {
+  async (req, res) => {
 
-
-    const errors = validationResult(request);
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
       console.log(errors)
-      return response.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    const body = request.body
+    const body = req.body
 
 
     try {
@@ -42,7 +39,7 @@ usersRouter.post('/',
 
       if (user) {
         console.log(errors)
-        return response.status(400).json({ errors: [{ msg: 'User already exists with this email', param: 'userExists' }] })
+        return res.status(400).json({ errors: [{ msg: 'User already exists with this email', param: 'userExists' }] })
       }
 
 
@@ -61,7 +58,7 @@ usersRouter.post('/',
       })
 
       const savedUser = await user.save()
-      response.json(savedUser)
+      res.json(savedUser)
     } catch (err) {
       console.log('ERRRRR', err)
     }
@@ -71,22 +68,11 @@ usersRouter.post('/',
 // @desc Create or update user profile
 // @access Private
 
-usersRouter.post('/profile', async (request, response, next) => {
-  const body = request.body
-
-  const token = getTokenFrom(request)
+usersRouter.post('/profile', auth, async (req, res, next) => {
+  const body = req.body
+  const user = req.user
 
   try {
-    const decodedToken = jwt.verify(token, process.env.SECRET)
-    if (!token || !decodedToken.id) {
-      return response.status(401).json({ error: 'token missing or invalid' })
-    }
-
-
-
-    const user = await User.findById(decodedToken.id)
-    console.log('user id', user.id)
-
     const profileFields = {
       country: body.country,
       region: body.region,
@@ -105,7 +91,7 @@ usersRouter.post('/profile', async (request, response, next) => {
       console.log('FOUND AND UPDATED PROFILE')
 
       profile = await Profile.findOneAndUpdate({ user: user.id }, { $set: profileFields }, { new: true })
-      return response.json(profile)
+      return res.json(profile)
     }
 
     // CREATE
@@ -116,38 +102,27 @@ usersRouter.post('/profile', async (request, response, next) => {
     const savedProfile = await profile.save()
     user.profile = user.profile.concat(savedProfile._id)
     await user.save()
-    response.json(savedProfile)
+    res.json(savedProfile)
   } catch (exception) {
     next(exception)
   }
 })
 
 
-usersRouter.get('/', async (request, response) => {
+// @route GET /users
+// @desc Get all users, including profiles and avatars
+// @access Public
+
+usersRouter.get('/', async (req, res) => {
   const users = await User.find({}).populate('profile').populate('avatar')
-  response.json(users.map(u => u.toJSON()))
+  res.json(users.map(u => u.toJSON()))
   console.log('get users', users)
 })
 
 
-
-
-
-
-// usersRouter.get('/:id', async (request, response, next) => {
-//   try {
-//     // const profile = await Profile.find({ username: request.params.username })
-//     // console.log(request.params.username)
-//     const user = await User.findById(request.params.id)
-//     if (user) {
-//       response.json(user.toJSON())
-//     } else {
-//       response.status(404).end()
-//     }
-//   } catch (exception) {
-//     next(exception)
-//   }
-// })
+// @route GET /:username
+// @desc Get specific user, including profile, avatar, and portfolio uploads
+// @access public
 
 usersRouter.get('/:username', async (req, res, next) => {
   const user = await User.find({ username: req.params.username }).populate('profile').populate('avatar').populate('upload')
@@ -158,21 +133,12 @@ usersRouter.get('/:username', async (req, res, next) => {
 
 
 // @route DELETE users/:username
-// @desc Delete profile and user
+// @desc Delete profile and user for logged in user
 // @access private
 
-usersRouter.delete('/profile', async (request, response, next) => {
-
-
-  const token = getTokenFrom(request)
-
+usersRouter.delete('/profile', auth, async (req, res, next) => {
   try {
-    const decodedToken = jwt.verify(token, process.env.SECRET)
-    if (!token || !decodedToken.id) {
-      return response.status(401).json({ error: 'token missing or invalid' })
-    }
-
-    const user = await User.findById(decodedToken.id)
+    const user = req.user
     console.log('user id', user.id)
 
     // Remove profile
@@ -182,7 +148,7 @@ usersRouter.delete('/profile', async (request, response, next) => {
     await User.findOneAndRemove({ _id: user.id })
     console.log('user deleted')
 
-    response.json({ msg: 'User deleted ' })
+    res.json({ msg: 'User deleted ' })
   } catch (error) {
     console.log(error)
   }
