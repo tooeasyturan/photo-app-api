@@ -73,7 +73,7 @@ usersRouter.post(
 
 usersRouter.post("/profile", auth, async (req, res, next) => {
   const body = req.body;
-  const user = req.user;
+  let user = req.user;
 
   try {
     const profileFields = {
@@ -105,6 +105,8 @@ usersRouter.post("/profile", auth, async (req, res, next) => {
     console.log("CREATED NEW PROFILE");
     profile = new Profile(profileFields);
 
+    user = await User.findById(req.user.id);
+
     const savedProfile = await profile.save();
     user.profile = user.profile.concat(savedProfile._id);
     await user.save();
@@ -113,6 +115,17 @@ usersRouter.post("/profile", auth, async (req, res, next) => {
     next(exception);
   }
 });
+
+// profile = new Profile(profileFields);
+
+// user = await User.findById(req.user.id);
+// const savedProfile = await profile.save();
+// console.log("saved profile", savedProfile);
+// user.profile = user.profile.concat(savedProfile._id);
+// await user.save();
+// console.log("CREATED NEW PROFILE");
+
+// res.json(savedProfile);
 
 // @route GET /users
 // @desc Get all users, including profiles and avatars
@@ -129,7 +142,6 @@ usersRouter.get("/", async (req, res) => {
 // @access public
 
 usersRouter.get("/:username", async (req, res, next) => {
-  console.log("get profile", user);
   const user = await User.find({ username: req.params.username })
     .populate("profile")
     .populate("avatar")
