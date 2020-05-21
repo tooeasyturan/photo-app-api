@@ -1,11 +1,7 @@
 const bcrypt = require("bcrypt");
-const express = require("express");
 const usersRouter = require("express").Router();
-const fs = require("fs");
 const User = require("../models/user");
 const Profile = require("../models/profile");
-const jwt = require("jsonwebtoken");
-const Avatar = require("../models/avatar");
 const { check, validationResult } = require("express-validator");
 const middleware = require("../utils/middleware");
 const auth = middleware.auth;
@@ -28,10 +24,18 @@ usersRouter.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const body = req.body;
+    console.log("body", req.body.firstName);
 
     try {
-      let user = await User.findOne({ email: body.email });
+      const {
+        firstName,
+        lastName,
+        username,
+        email,
+        status,
+        password,
+      } = req.body;
+      let user = await User.findOne({ email });
 
       if (user) {
         console.log(errors);
@@ -46,23 +50,24 @@ usersRouter.post(
       }
 
       const saltRounds = 10;
-      const passwordHash = await bcrypt.hash(body.password, saltRounds);
+      const passwordHash = await bcrypt.hash(password, saltRounds);
 
       user = new User({
-        firstName: body.firstName,
-        lastName: body.lastName,
-        username: body.username,
-        email: body.email,
-        status: body.status,
+        firstName,
+        lastName,
+        username,
+        email,
+        status,
         date: new Date(),
-        password: body.password,
+        password,
         passwordHash,
       });
 
       const savedUser = await user.save();
       res.json(savedUser);
     } catch (err) {
-      console.log("ERRRRR", err);
+      console.error(err.message);
+      res.status(500).send("asdf");
     }
   }
 );
