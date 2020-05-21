@@ -11,6 +11,7 @@ const auth = middleware.auth;
 
 profilesRouter.post("/", auth, async (req, res, next) => {
   const { country, region, description, experience, shootingStyle } = req.body;
+  console.log("profile body", req.body);
   let user = req.user;
 
   try {

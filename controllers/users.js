@@ -24,7 +24,7 @@ usersRouter.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    console.log("body", req.body.firstName);
+    console.log("body", req.body);
 
     try {
       const {
