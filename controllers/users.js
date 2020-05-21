@@ -137,7 +137,7 @@ usersRouter.post("/profile", auth, async (req, res, next) => {
 // @access Public
 
 usersRouter.get("/", async (req, res) => {
-  const users = await User.find({}).populate("profile").populate("avatar");
+  const users = await User.find({}).populate("profile");
   res.json(users.map((u) => u.toJSON()));
   console.log("get users", users);
 });
@@ -149,7 +149,7 @@ usersRouter.get("/", async (req, res) => {
 usersRouter.get("/:username", async (req, res, next) => {
   const user = await User.find({ username: req.params.username })
     .populate("profile")
-    .populate("avatar")
+    // .populate("avatar")
     .populate("upload");
   console.log(user);
   res.json(user);
