@@ -10,29 +10,16 @@ const auth = middleware.auth;
 // @access Private
 
 profilesRouter.post("/", auth, async (req, res, next) => {
-  const {
-    country,
-    region,
-    description,
-    experience,
-    shootingStyle,
-    website,
-    socialMedia,
-  } = req.body;
+  const { country, region, description, experience, shootingStyle } = req.body;
   let user = req.user;
 
   try {
     const profileFields = {
-      location: {
-        country: country,
-        region: region,
-      },
+      country: country,
+      region: region,
       description,
       experience,
       shootingStyle,
-      website,
-      // instagram: socialMedia.instagram,
-      // facebook: socialMedia.facebook,
       user: user._id,
     };
 
