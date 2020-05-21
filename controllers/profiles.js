@@ -9,9 +9,10 @@ const auth = middleware.auth;
 // @desc Create or update user profile
 // @access Private
 
-profilesRouter.post("/profile", auth, async (req, res, next) => {
+profilesRouter.post("/", auth, async (req, res, next) => {
   const {
-    location,
+    country,
+    region,
     description,
     experience,
     shootingStyle,
@@ -22,14 +23,16 @@ profilesRouter.post("/profile", auth, async (req, res, next) => {
 
   try {
     const profileFields = {
-      country: location.country,
-      region: location.region,
+      location: {
+        country: country,
+        region: region,
+      },
       description,
       experience,
       shootingStyle,
       website,
-      instagram: socialMedia.instagram,
-      facebook: socialMedia.facebook,
+      // instagram: socialMedia.instagram,
+      // facebook: socialMedia.facebook,
       user: user._id,
     };
 
@@ -54,7 +57,8 @@ profilesRouter.post("/profile", auth, async (req, res, next) => {
     user = await User.findById(req.user.id);
 
     const savedProfile = await profile.save();
-    user.profile = user.profile.concat(savedProfile._id);
+    // user.profile = user.profile.concat(savedProfile._id);
+    user.profile = savedProfile._id;
     await user.save();
     res.json(savedProfile);
   } catch (exception) {
