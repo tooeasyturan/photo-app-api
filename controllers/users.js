@@ -77,19 +77,20 @@ usersRouter.post(
 // @access Private
 
 usersRouter.post("/profile", auth, async (req, res, next) => {
-  const body = req.body;
+  const { country, region, description, experience, shootingStyle, website,
+    socialMedia } = req.body;
   let user = req.user;
   console.log('REQ USER!!', req.user.id)
 
   try {
     const profileFields = {
-      country: body.country,
-      region: body.region,
-      description: body.description,
-      experience: body.experience,
-      shootingStyle: body.shootingStyle,
-      website: body.website,
-      socialMedia: body.socialMedia,
+      country,
+      region,
+      description,
+      experience,
+      shootingStyle,
+      website,
+      socialMedia,
       user: user.id,
     };
 
@@ -125,16 +126,6 @@ usersRouter.post("/profile", auth, async (req, res, next) => {
   }
 });
 
-// profile = new Profile(profileFields);
-
-// user = await User.findById(req.user.id);
-// const savedProfile = await profile.save();
-// console.log("saved profile", savedProfile);
-// user.profile = user.profile.concat(savedProfile._id);
-// await user.save();
-// console.log("CREATED NEW PROFILE");
-
-// res.json(savedProfile);
 
 // @route GET /users
 // @desc Get all users, including profiles and avatars
