@@ -43,7 +43,7 @@ app.use("/users", usersRouter);
 app.use("/login", loginRouter);
 app.use("/auth", authRouter);
 app.use("/uploads", uploadsRouter);
-app.use("/profile", profilesRouter);
+// app.use("/profile", profilesRouter);
 
 console.log(app.routes);
 

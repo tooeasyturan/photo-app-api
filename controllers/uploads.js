@@ -54,8 +54,9 @@ uploadsRouter.post("/", auth, upload.single("file"), async (req, res) => {
 // @access Private
 
 uploadsRouter.post("/avatar", auth, upload.single("file"), async (req, res) => {
+  console.log("SAVING AAVATAR");
   const user = await User.findById(req.user.id);
-  // let avatar = await Avatar.findOne({ user: user.id });
+  let avatar = await Avatar.findOne({ user: user._id });
 
   try {
     req.file.originalname = req.file.originalname.replace(/\.[^/.]+$/, "");
@@ -64,23 +65,27 @@ uploadsRouter.post("/avatar", auth, upload.single("file"), async (req, res) => {
       overwrite: false,
     });
 
-    if (user.avatar) {
-      await User.findOneAndUpdate(
+    if (avatar) {
+      console.log("avatar to be saved", avatar);
+      console.log("user to avatar", user.id);
+      await Avatar.findOneAndUpdate(
         { user: user.id },
         { $set: { avatar: result.url } },
         { new: true }
       );
-      return res.json(user.avatar);
+      return res.json(avatar);
     }
 
-    // avatar = new Avatar({
-    //   avatar: result.url,
-    //   user: user._id,
-    // });
+    avatar = new Avatar({
+      avatar: result.url,
+      user: user._id,
+    });
 
-    // await avatar.save();
-    // user.avatar = user.avatar.concat(savedAvatar._id);
-    user.avatar = result.url;
+    console.log('create avatar', avatar)
+
+    const savedAvatar = await avatar.save();
+    console.log("savedavatar", savedAvatar);
+    user.avatar = user.avatar.concat(savedAvatar._id);
     await user.save();
 
     res.send(result);
@@ -111,37 +116,21 @@ uploadsRouter.get("/:username", async (req, res) => {
 // @desc Get avatar for specific user
 // @access Public?
 
-// uploadsRouter.get("/:username/avatar", async (req, res) => {
-//   const user = await User.find({ username: req.params.username }).populate(
-//     "avatar"
-//   );
+uploadsRouter.get("/:username/avatar", async (req, res) => {
+  const user = await User.find({ username: req.params.username }).populate(
+    "avatar"
+  );
 
-//   if (user.length === 1) {
-//     const images = await Avatar.find({ user: user[0].id });
-//     const mappedImages = images.map((image) => image.avatar);
-//     console.log("IMAGES", mappedImages);
-//     res.send(mappedImages);
-//   } else {
-//     res.status(404).send("not found");
-//   }
-// });
+  if (user.length === 1) {
+    const images = await Avatar.find({ user: user[0].id });
+    const mappedImages = images.map((image) => image.avatar);
+    console.log("IMAGES", mappedImages);
+    res.send(mappedImages);
+  } else {
+    res.status(404).send("not found");
+  }
+});
 
-// @route GET /uploads/:username/avatar
-// @desc Get avatar for specific user
-// @access Public?
-
-// uploadsRouter.get("/:username/avatar", async (req, res) => {
-//   const user = await User.find({ username: req.params.username });
-
-//   if (user.length === 1) {
-//     const images = await Avatar.find({ user: user[0].id });
-//     const mappedImages = images.map((image) => image.avatar);
-//     console.log("IMAGES", mappedImages);
-//     res.send(mappedImages);
-//   } else {
-//     res.status(404).send("not found");
-//   }
-// });
 
 // @route DELETE /uploads
 // @desc Delete selected upload for logged in user

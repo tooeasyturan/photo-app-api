@@ -79,6 +79,7 @@ usersRouter.post(
 usersRouter.post("/profile", auth, async (req, res, next) => {
   const body = req.body;
   let user = req.user;
+  console.log('REQ USER!!', req.user.id)
 
   try {
     const profileFields = {
@@ -89,20 +90,23 @@ usersRouter.post("/profile", auth, async (req, res, next) => {
       shootingStyle: body.shootingStyle,
       website: body.website,
       socialMedia: body.socialMedia,
-      user: user._id,
+      user: user.id,
     };
 
-    let profile = await Profile.findOne({ user: user.id });
+
+    let profile = await Profile.findOne({ user: req.user.id });
+    console.log("FOUND USER", profile);
 
     if (profile) {
       // UPDATE
-      console.log("FOUND AND UPDATED PROFILE");
+
 
       profile = await Profile.findOneAndUpdate(
         { user: user.id },
         { $set: profileFields },
         { new: true }
       );
+      console.log("FOUND AND UPDATED PROFILE");
       return res.json(profile);
     }
 
@@ -137,7 +141,7 @@ usersRouter.post("/profile", auth, async (req, res, next) => {
 // @access Public
 
 usersRouter.get("/", async (req, res) => {
-  const users = await User.find({}).populate("profile");
+  const users = await User.find({}).populate("profile").populate("avatar");
   res.json(users.map((u) => u.toJSON()));
   console.log("get users", users);
 });
@@ -149,7 +153,7 @@ usersRouter.get("/", async (req, res) => {
 usersRouter.get("/:username", async (req, res, next) => {
   const user = await User.find({ username: req.params.username })
     .populate("profile")
-    // .populate("avatar")
+    .populate("avatar")
     .populate("upload");
   console.log(user);
   res.json(user);

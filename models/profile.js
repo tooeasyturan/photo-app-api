@@ -1,3 +1,5 @@
+/** @format */
+
 const mongoose = require("mongoose");
 
 const profileSchema = new mongoose.Schema({
@@ -10,11 +12,11 @@ const profileSchema = new mongoose.Schema({
   socialMedia: String,
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
   },
 });
 
-profileSchema.set("toJSON", {
+profileSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
     delete returnedObject._id;
@@ -22,4 +24,4 @@ profileSchema.set("toJSON", {
   },
 });
 
-module.exports = mongoose.model("Profile", profileSchema);
+module.exports = mongoose.model('Profile', profileSchema);

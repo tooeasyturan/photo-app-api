@@ -11,7 +11,7 @@ const auth = middleware.auth;
 
 profilesRouter.post("/", auth, async (req, res, next) => {
   const { country, region, description, experience, shootingStyle } = req.body;
-  console.log("profile body", req.body);
+  console.log("HELLO!!!", req.body);
   let user = req.user;
 
   try {
@@ -25,6 +25,7 @@ profilesRouter.post("/", auth, async (req, res, next) => {
     };
 
     let profile = await Profile.findOne({ user: user.id });
+    console.log('profile user', user.id)
 
     if (profile) {
       // UPDATE
@@ -40,13 +41,13 @@ profilesRouter.post("/", auth, async (req, res, next) => {
     }
 
     // CREATE
-    console.log("CREATED NEW PROFILE");
+    console.log("CREATED NEW PROFILE adsf");
     profile = new Profile(profileFields);
     user = await User.findById(req.user.id);
 
     const savedProfile = await profile.save();
-    // user.profile = user.profile.concat(savedProfile._id);
-    user.profile = savedProfile._id;
+    user.profile = user.profile.concat(savedProfile._id);
+    // user.profile = savedProfile._id;
     await user.save();
     res.json(savedProfile);
   } catch (exception) {
