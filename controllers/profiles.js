@@ -11,7 +11,6 @@ const auth = middleware.auth;
 
 profilesRouter.post("/", auth, async (req, res, next) => {
   const { country, region, description, experience, shootingStyle } = req.body;
-  console.log("HELLO!!!", req.body);
   let user = req.user;
 
   try {
@@ -25,18 +24,17 @@ profilesRouter.post("/", auth, async (req, res, next) => {
     };
 
     let profile = await Profile.findOne({ user: user.id });
-    console.log('profile user', user.id)
 
     if (profile) {
       // UPDATE
-      console.log("FOUND AND UPDATED PROFILE");
 
       profile = await Profile.findOneAndUpdate(
         { user: user.id },
         { $set: profileFields },
         { new: true }
       );
-      console.log("profile created", profile);
+      console.log("FOUND AND UPDATED PROFILE");
+
       return res.json(profile);
     }
 

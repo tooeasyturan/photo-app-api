@@ -24,8 +24,6 @@ usersRouter.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    console.log("body", req.body);
-
     try {
       const {
         firstName,
@@ -80,7 +78,6 @@ usersRouter.post("/profile", auth, async (req, res, next) => {
   const { country, region, description, experience, shootingStyle, website,
     socialMedia } = req.body;
   let user = req.user;
-  console.log('REQ USER!!', req.user.id)
 
   try {
     const profileFields = {
@@ -96,12 +93,8 @@ usersRouter.post("/profile", auth, async (req, res, next) => {
 
 
     let profile = await Profile.findOne({ user: req.user.id });
-    console.log("FOUND USER", profile);
-
     if (profile) {
       // UPDATE
-
-
       profile = await Profile.findOneAndUpdate(
         { user: user.id },
         { $set: profileFields },
@@ -118,7 +111,10 @@ usersRouter.post("/profile", auth, async (req, res, next) => {
     user = await User.findById(req.user.id);
 
     const savedProfile = await profile.save();
-    user.profile = user.profile.concat(savedProfile._id);
+    // user.profile = user.profile.concat(savedProfile._id);
+    user.profile = savedProfile.id;
+    console.log('user.profile', user.profile)
+
     await user.save();
     res.json(savedProfile);
   } catch (exception) {
@@ -132,9 +128,8 @@ usersRouter.post("/profile", auth, async (req, res, next) => {
 // @access Public
 
 usersRouter.get("/", async (req, res) => {
-  const users = await User.find({}).populate("profile").populate("avatar");
+  const users = await User.find({}).populate("profile");
   res.json(users.map((u) => u.toJSON()));
-  console.log("get users", users);
 });
 
 // @route GET /:username
@@ -143,10 +138,8 @@ usersRouter.get("/", async (req, res) => {
 
 usersRouter.get("/:username", async (req, res, next) => {
   const user = await User.find({ username: req.params.username })
-    .populate("profile")
-    .populate("avatar")
-    .populate("upload");
-  console.log(user);
+    .populate('profile')
+    .populate('upload');
   res.json(user);
 });
 
@@ -157,7 +150,6 @@ usersRouter.get("/:username", async (req, res, next) => {
 usersRouter.delete("/profile", auth, async (req, res, next) => {
   try {
     const user = req.user;
-    console.log("user id", user.id);
 
     // Remove profile
     await Profile.findOneAndRemove({ user: user.id });

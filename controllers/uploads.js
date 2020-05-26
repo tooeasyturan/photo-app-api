@@ -56,7 +56,7 @@ uploadsRouter.post("/", auth, upload.single("file"), async (req, res) => {
 uploadsRouter.post("/avatar", auth, upload.single("file"), async (req, res) => {
   console.log("SAVING AAVATAR");
   const user = await User.findById(req.user.id);
-  let avatar = await Avatar.findOne({ user: user._id });
+  // let avatar = await Avatar.findOne({ user: user.id });
 
   try {
     req.file.originalname = req.file.originalname.replace(/\.[^/.]+$/, "");
@@ -65,27 +65,29 @@ uploadsRouter.post("/avatar", auth, upload.single("file"), async (req, res) => {
       overwrite: false,
     });
 
-    if (avatar) {
-      console.log("avatar to be saved", avatar);
+    if (user.avatar) {
       console.log("user to avatar", user.id);
-      await Avatar.findOneAndUpdate(
-        { user: user.id },
+      console.log('new url', result.url)
+      await User.findOneAndUpdate(
+        { _id: user.id },
         { $set: { avatar: result.url } },
         { new: true }
       );
-      return res.json(avatar);
+      return res.json(user.avatar);
     }
 
-    avatar = new Avatar({
-      avatar: result.url,
-      user: user._id,
-    });
+    // avatar = new Avatar({
+    //   avatar: result.url,
+    //   user: user._id,
+    // });
 
-    console.log('create avatar', avatar)
+    // console.log('create avatar', avatar)
 
-    const savedAvatar = await avatar.save();
-    console.log("savedavatar", savedAvatar);
-    user.avatar = user.avatar.concat(savedAvatar._id);
+    // const savedAvatar = await avatar.save();
+    // console.log("savedavatar", savedAvatar);
+    // user.avatar = user.avatar.concat(savedAvatar._id);
+    user.avatar = result.url;
+
     await user.save();
 
     res.send(result);
@@ -117,15 +119,11 @@ uploadsRouter.get("/:username", async (req, res) => {
 // @access Public?
 
 uploadsRouter.get("/:username/avatar", async (req, res) => {
-  const user = await User.find({ username: req.params.username }).populate(
-    "avatar"
-  );
+  const user = await User.find({ username: req.params.username });
+  console.log('FOUND USER AVATAR', user[0])
 
-  if (user.length === 1) {
-    const images = await Avatar.find({ user: user[0].id });
-    const mappedImages = images.map((image) => image.avatar);
-    console.log("IMAGES", mappedImages);
-    res.send(mappedImages);
+  if (user[0].avatar) {
+    res.send(user[0].avatar);
   } else {
     res.status(404).send("not found");
   }

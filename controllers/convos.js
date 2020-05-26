@@ -28,7 +28,6 @@ convosRouter.post('/', auth, async (req, res) => {
 
       let message = await Message.update({ convoId: convo[0].id }, { $push: { message: messageFields } })
 
-      console.log('found and updated message', message)
       return res.json(message)
     }
 
@@ -105,7 +104,6 @@ convosRouter.get('/:id', auth, async (req, res) => {
 convosRouter.post('/:id', auth, async (req, res) => {
   console.log(req.user.username)
   let convo = await Convo.find({ _id: req.params.id, })
-  console.log(convo)
   try {
     if (convo[0].sender === req.user.username) {
       convo = await Convo.update({ _id: req.params.id }, {

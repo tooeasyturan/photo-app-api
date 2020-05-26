@@ -28,24 +28,21 @@ const userSchema = mongoose.Schema({
     // required: true
   },
   passwordHash: String,
-  profile: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Profile',
-    },
-  ],
+  profile:
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Profile',
+  },
+
   upload: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Upload',
-    },
+    }
   ],
-  avatar: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Avatar',
-    },
-  ],
+  avatar: String
+
+
 });
 
 userSchema.set('toJSON', {

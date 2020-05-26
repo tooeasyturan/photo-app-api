@@ -8,7 +8,6 @@ const User = require("../models/user");
 // @access Private?
 
 loginRouter.post("/", async (request, response) => {
-  console.log("login body", request.body);
   const body = request.body;
 
   const user = await User.findOne({ username: body.username });
@@ -32,6 +31,7 @@ loginRouter.post("/", async (request, response) => {
 
   response.status(200).send({
     token,
+    id: user.id,
     username: user.username,
     name: user.name,
     status: user.status,
