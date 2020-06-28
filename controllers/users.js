@@ -62,6 +62,7 @@ usersRouter.post(
       });
 
       const savedUser = await user.save();
+      // res.json(savedUser);
       res.json(savedUser);
     } catch (err) {
       console.error(err.message);
@@ -101,7 +102,9 @@ usersRouter.post("/profile", auth, async (req, res, next) => {
         { new: true }
       );
       console.log("FOUND AND UPDATED PROFILE");
-      return res.json(profile);
+      // return res.json(profile);
+      return res.send('profile updated successfully');
+
     }
 
     // CREATE
@@ -116,7 +119,8 @@ usersRouter.post("/profile", auth, async (req, res, next) => {
     console.log('user.profile', user.profile)
 
     await user.save();
-    res.json(savedProfile);
+    // res.json(savedProfile);
+    res.send('Profile created successfully')
   } catch (exception) {
     next(exception);
   }
@@ -137,6 +141,7 @@ usersRouter.get("/", async (req, res) => {
 // @access public
 
 usersRouter.get("/:username", async (req, res, next) => {
+  console.log('get uploads')
   const user = await User.find({ username: req.params.username })
     .populate('profile')
     .populate('upload');

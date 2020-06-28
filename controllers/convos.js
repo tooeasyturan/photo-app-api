@@ -102,7 +102,7 @@ convosRouter.get('/:id', auth, async (req, res) => {
 // @desc Hide convo for loggedInUser (req.user) who has selected remove. This route needs a lot of work.
 // @access Private
 convosRouter.post('/:id', auth, async (req, res) => {
-  console.log(req.user.username)
+  console.log('convo username', req.user.username)
   let convo = await Convo.find({ _id: req.params.id, })
   try {
     if (convo[0].sender === req.user.username) {

@@ -32,7 +32,6 @@ const errorHandler = (error, request, response, next) => {
 }
 
 const auth = async (req, res, next) => {
-
   const getTokenFrom = req => {
     const authorization = req.get('authorization')
     if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
@@ -42,7 +41,6 @@ const auth = async (req, res, next) => {
   }
   // Get token from header
   const token = getTokenFrom(req)
-  console.log(token)
 
   // Check if no token
   if (!token) {
@@ -52,11 +50,8 @@ const auth = async (req, res, next) => {
   // Verify token
   try {
     const decodedToken = jwt.verify(token, process.env.SECRET)
-    console.log('decoded token', decodedToken)
-
     // const user = await User.findById(decodedToken.id)
     req.user = decodedToken
-    console.log('USERRR ID', req.user.id)
     next()
   } catch (error) {
     console.log(error)

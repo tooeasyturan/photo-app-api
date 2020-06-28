@@ -63,6 +63,8 @@ uploadsRouter.post("/avatar", auth, upload.single("file"), async (req, res) => {
     const result = await cloudinary.v2.uploader.upload(req.file.path, {
       public_id: `${req.user.username}/avatar/${req.file.originalname}`,
       overwrite: false,
+      width: 392,
+      height: 262
     });
 
     if (user.avatar) {
@@ -101,6 +103,7 @@ uploadsRouter.post("/avatar", auth, upload.single("file"), async (req, res) => {
 // @access Public
 
 uploadsRouter.get("/:username", async (req, res) => {
+  console.log('get uploads...')
   const user = await User.find({ username: req.params.username });
 
   if (user.length === 1) {
